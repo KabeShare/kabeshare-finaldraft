@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /api/
+Disallow: /cart/
+Disallow: /my-orders/
+Disallow: /order-placed/
+Disallow: /add-address/
+Disallow: /user-point/
+Disallow: /seller/
+
+# Allow all other content
+Allow: /
+
+# Sitemap location
+Sitemap: https://kabeshare.com/sitemap.xml
