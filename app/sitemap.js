@@ -1,18 +1,32 @@
 // app/sitemap.js
 
-import { products } from './assets/productData'; // Assuming this is how you get product data
-
 const URL = 'https://kabeshare.com';
 
 export default async function sitemap() {
-  // Fetch all products to generate dynamic routes
-  // In a real app, you would fetch this from your database or API
-  // For example: const response = await fetch(`${URL}/api/product/list`);
-  // const { products } = await response.json();
+  let products = [];
+
+  try {
+    // Fetch products from your API
+    const response = await fetch(`${URL}/api/product/list`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      products = data.products || [];
+    }
+  } catch (error) {
+    console.error('Error fetching products for sitemap:', error);
+    // Continue with empty products array if fetch fails
+  }
 
   const productUrls = products.map((product) => ({
     url: `${URL}/product/${product._id}`,
-    lastModified: new Date(), // Or use a date from your product data if available
+    lastModified: new Date(
+      product.updatedAt || product.createdAt || new Date()
+    ),
+    changeFrequency: 'weekly',
+    priority: 0.8,
   }));
 
   // Add your static routes
@@ -20,14 +34,20 @@ export default async function sitemap() {
     {
       url: `${URL}/`,
       lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1.0,
     },
     {
       url: `${URL}/all-products`,
       lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${URL}/vision`,
       lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
   ];
 
