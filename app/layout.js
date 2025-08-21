@@ -77,6 +77,28 @@ const customJaLocalization = {
 export const metadata = {
   title: 'Kabe Gallery',
   description: 'E-Commerce with Next.js ',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      'index': true,
+      'follow': true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_VERIFICATION,
+  },
+  openGraph: {
+    title: 'Kabe Gallery',
+    description: 'E-Commerce with Next.js',
+    url: 'https://kabeshare.com',
+    siteName: 'Kabe Gallery',
+    locale: 'ja_JP',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {

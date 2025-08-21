@@ -32,7 +32,7 @@ export default async function sitemap() {
   // Add your static routes
   const staticUrls = [
     {
-      url: `${URL}/`,
+      url: `${URL}`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1.0,

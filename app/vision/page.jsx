@@ -1,6 +1,16 @@
-import React from "react";
-import Navbar from "@/components/Navbar"; // Adjust the path as needed
-import Footer from "@/components/Footer"; // Adjust the path as needed
+import React from 'react';
+import Navbar from '@/components/Navbar'; // Adjust the path as needed
+import Footer from '@/components/Footer'; // Adjust the path as needed
+
+export const metadata = {
+  title: 'Vision - Kabe Gallery | 壁を育てろ、壁で育てろ',
+  description:
+    '「壁から、個性と創造性が花開く社会を。」芸術と日常が自然に交わることで、人々が自分らしさに気づき、育てていける社会を目指します。',
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 const Vision = () => {
   return (
