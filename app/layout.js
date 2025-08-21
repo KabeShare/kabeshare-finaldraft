@@ -76,7 +76,8 @@ const customJaLocalization = {
 
 export const metadata = {
   title: 'Kabe Gallery',
-  description: 'E-Commerce with Next.js ',
+  description:
+    'An innovative e-commerce website with gamification features that boost engagement, customer loyalty, and sales through rewards, challenges, and achievements.',
   robots: {
     index: true,
     follow: true,
@@ -93,7 +94,8 @@ export const metadata = {
   },
   openGraph: {
     title: 'Kabe Gallery',
-    description: 'E-Commerce with Next.js',
+    description:
+      'An innovative e-commerce website with gamification features that boost engagement, customer loyalty, and sales through rewards, challenges, and achievements.',
     url: 'https://kabeshare.com',
     siteName: 'Kabe Gallery',
     locale: 'ja_JP',
