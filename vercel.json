@@ -1,0 +1,28 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "www.kabeshare.com" }
+      ],
+      "destination": "https://kabeshare.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "kabeshare-finaldraft.vercel.app" }
+      ],
+      "destination": "https://kabeshare.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "host", "value": "kabeshare-finaldraft-k94e8lm8t-kabe-shares-projects.vercel.app" }
+      ],
+      "destination": "https://kabeshare.com/$1",
+      "permanent": true
+    }
+  ]
+}
