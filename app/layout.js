@@ -92,6 +92,9 @@ export const metadata = {
   verification: {
     google: process.env.GOOGLE_VERIFICATION,
   },
+  alternates: {
+    canonical: 'https://kabeshare.com/',
+  },
   openGraph: {
     title: 'Kabe Gallery',
     description:

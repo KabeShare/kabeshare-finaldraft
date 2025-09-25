@@ -25,6 +25,9 @@ export async function generateMetadata({ params }) {
           index: true,
           follow: true,
         },
+        alternates: {
+          canonical: 'https://kabeshare.com/',
+        },
         openGraph: {
           title: `${product.name} - Kabe Gallery`,
           description:
@@ -44,6 +47,9 @@ export async function generateMetadata({ params }) {
     robots: {
       index: true,
       follow: true,
+    },
+    alternates: {
+      canonical: 'https://kabeshare.com/',
     },
   };
 }

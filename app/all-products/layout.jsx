@@ -6,6 +6,9 @@ export const metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://kabeshare.com/all-products',
+  },
 };
 
 export default function AllProductsLayout({ children }) {
