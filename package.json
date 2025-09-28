@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-env": "node scripts/check-env.js",
+    "test-app": "node scripts/test-app.js",
+    "status": "echo 'KabeShare Development Status:' && npm run check-env",
+    "dev-safe": "npm run check-env && npm run dev"
   },
   "dependencies": {
     "@clerk/backend": "^1.29.1",

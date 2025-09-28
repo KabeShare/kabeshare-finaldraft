@@ -1,9 +1,20 @@
 'use client';
-import { useAuth, useUser } from '@clerk/nextjs';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+
+// Conditional Clerk imports
+let useAuth, useUser;
+try {
+  const clerkHooks = require('@clerk/nextjs');
+  useAuth = clerkHooks.useAuth;
+  useUser = clerkHooks.useUser;
+} catch (error) {
+  console.warn('Clerk not available, using mock hooks');
+  useAuth = () => ({ getToken: () => null });
+  useUser = () => ({ user: null });
+}
 // import { productsDummyData, userDummyData } from "@/assets/assets";
 
 export const AppContext = createContext();
@@ -16,8 +27,18 @@ export const AppContextProvider = (props) => {
   const currency = process.env.NEXT_PUBLIC_CURRENCY;
   const router = useRouter();
 
-  const { user } = useUser();
-  const { getToken } = useAuth();
+  // Safe hook usage with fallbacks
+  let user, getToken;
+  try {
+    const userHook = useUser();
+    const authHook = useAuth();
+    user = userHook?.user || null;
+    getToken = authHook?.getToken || (() => Promise.resolve(null));
+  } catch (error) {
+    console.warn('Clerk hooks not available:', error);
+    user = null;
+    getToken = () => Promise.resolve(null);
+  }
 
   const [products, setProducts] = useState([]);
   const [userData, setUserData] = useState(false);

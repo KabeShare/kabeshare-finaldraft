@@ -1,0 +1,10 @@
+{
+  "name": "kabe-share-dev-check",
+  "version": "1.0.0",
+  "description": "Development environment check for KabeShare",
+  "scripts": {
+    "check-env": "node scripts/check-env.js",
+    "dev-safe": "npm run check-env && npm run dev",
+    "setup-dev": "node scripts/setup-dev.js"
+  }
+}

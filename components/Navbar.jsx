@@ -4,11 +4,57 @@ import { assets, BagIcon, BoxIcon, CartIcon, HomeIcon } from '@/assets/assets';
 import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import Image from 'next/image';
-import { useClerk, UserButton } from '@clerk/nextjs';
+
+// Conditional Clerk imports with fallbacks
+let useClerk, UserButton;
+const isClerkAvailable =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !==
+    'pk_test_ZGV2LWNsZXJrLWZha2Uta2V5LWZvci1kZXZlbG9wbWVudA';
+
+if (isClerkAvailable) {
+  try {
+    const clerkComponents = require('@clerk/nextjs');
+    useClerk = clerkComponents.useClerk;
+    UserButton = clerkComponents.UserButton;
+  } catch (error) {
+    console.warn('Clerk components failed to load:', error);
+    useClerk = () => ({
+      openSignIn: () => console.log('Sign-in not available'),
+    });
+    UserButton = null;
+  }
+} else {
+  useClerk = () => ({
+    openSignIn: () => console.log('Sign-in not available in development mode'),
+  });
+  UserButton = null;
+}
+
+// Fallback UserButton component for development
+const FallbackUserButton = ({ onClick, children, ...props }) => (
+  <div
+    onClick={onClick}
+    className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm cursor-pointer hover:bg-gray-400"
+  >
+    👤
+  </div>
+);
 
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
-  const { openSignIn } = useClerk();
+
+  // Safe Clerk hook usage with fallback
+  let openSignIn;
+  try {
+    const clerkHook = useClerk();
+    openSignIn =
+      clerkHook?.openSignIn ||
+      (() => console.log('Sign-in not available in development mode'));
+  } catch (error) {
+    console.warn('Clerk hook not available:', error);
+    openSignIn = () => console.log('Sign-in not available in development mode');
+  }
   const [userPoints, setUserPoints] = useState(0);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
 
@@ -119,18 +165,23 @@ const Navbar = () => {
 
         <div className="w-[160px] flex justify-end">
           <ul className="hidden md:flex items-center gap-4 ">
-            {user ? (
-              <>
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      label={`ポイント: ${userPoints}`} // Reflect updated points
-                      labelIcon={<BoxIcon />}
-                      onClick={() => router.push('/user-point')} // Navigate to the new page
-                    />
-                  </UserButton.MenuItems>
-                </UserButton>
-              </>
+            {user && isClerkAvailable && UserButton ? (
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label={`ポイント: ${userPoints}`} // Reflect updated points
+                    labelIcon={<BoxIcon />}
+                    onClick={() => router.push('/user-point')} // Navigate to the new page
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            ) : user ? (
+              <div className="flex items-center gap-2">
+                <FallbackUserButton
+                  onClick={() => router.push('/user-point')}
+                />
+                <span className="text-sm">ポイント: {userPoints}</span>
+              </div>
             ) : (
               <button
                 onClick={openSignIn}
@@ -148,69 +199,96 @@ const Navbar = () => {
             メニュー
           </div>
           <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <UserButton>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      label="ホーム"
-                      labelIcon={<HomeIcon />}
-                      onClick={() => router.push('/')}
-                    />
-                  </UserButton.MenuItems>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      label="ギャラリー"
-                      labelIcon={
-                        <Image
-                          src={assets.gallery}
-                          alt="Gallery Icon"
-                          width={24}
-                          height={24}
-                        />
-                      }
-                      onClick={() => router.push('/all-products')}
-                    />
-                  </UserButton.MenuItems>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      label="ビジョン"
-                      labelIcon={
-                        <Image
-                          src={assets.vision}
-                          alt="Gallery Icon"
-                          width={24}
-                          height={24}
-                        />
-                      }
-                      onClick={() => router.push('/vision')}
-                    />
-                  </UserButton.MenuItems>
-                  <UserButton.MenuItems>
-                    <UserButton.Action
-                      label={`ポイント: ${userPoints}`}
-                      labelIcon={<BoxIcon />}
-                      onClick={() => router.push('/user-point')}
-                    />
-                  </UserButton.MenuItems>
-                  {isSeller && (
-                    <UserButton.MenuItems>
-                      <UserButton.Action
-                        label="管理者ダッシュボード"
-                        labelIcon={
-                          <Image
-                            src={assets.admindashboard}
-                            alt="管理者ダッシュボード"
-                            width={24}
-                            height={24}
-                          />
-                        }
-                        onClick={() => router.push('/seller')}
+            {user && isClerkAvailable && UserButton ? (
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="ホーム"
+                    labelIcon={<HomeIcon />}
+                    onClick={() => router.push('/')}
+                  />
+                </UserButton.MenuItems>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="ギャラリー"
+                    labelIcon={
+                      <Image
+                        src={assets.gallery}
+                        alt="Gallery Icon"
+                        width={24}
+                        height={24}
                       />
-                    </UserButton.MenuItems>
-                  )}
-                </UserButton>
-              </>
+                    }
+                    onClick={() => router.push('/all-products')}
+                  />
+                </UserButton.MenuItems>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="ビジョン"
+                    labelIcon={
+                      <Image
+                        src={assets.vision}
+                        alt="Gallery Icon"
+                        width={24}
+                        height={24}
+                      />
+                    }
+                    onClick={() => router.push('/vision')}
+                  />
+                </UserButton.MenuItems>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label={`ポイント: ${userPoints}`}
+                    labelIcon={<BoxIcon />}
+                    onClick={() => router.push('/user-point')}
+                  />
+                </UserButton.MenuItems>
+                {isSeller && (
+                  <UserButton.MenuItems>
+                    <UserButton.Action
+                      label="管理者ダッシュボード"
+                      labelIcon={
+                        <Image
+                          src={assets.admindashboard}
+                          alt="管理者ダッシュボード"
+                          width={24}
+                          height={24}
+                        />
+                      }
+                      onClick={() => router.push('/seller')}
+                    />
+                  </UserButton.MenuItems>
+                )}
+              </UserButton>
+            ) : user ? (
+              <div className="flex flex-col gap-2">
+                <FallbackUserButton
+                  onClick={() => router.push('/user-point')}
+                />
+                <div className="text-center">
+                  <div className="text-xs">ポイント: {userPoints}</div>
+                  <div className="flex gap-2 text-xs mt-1">
+                    <button
+                      onClick={() => router.push('/')}
+                      className="hover:text-blue-600"
+                    >
+                      ホーム
+                    </button>
+                    <button
+                      onClick={() => router.push('/all-products')}
+                      className="hover:text-blue-600"
+                    >
+                      ギャラリー
+                    </button>
+                    <button
+                      onClick={() => router.push('/vision')}
+                      className="hover:text-blue-600"
+                    >
+                      ビジョン
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <button
                 onClick={openSignIn}
