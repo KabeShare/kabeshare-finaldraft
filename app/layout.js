@@ -10,6 +10,11 @@ export const metadata = {
   title: 'Kabe Share',
   description:
     'An innovative e-commerce website with gamification features that boost engagement, customer loyalty, and sales through rewards, challenges, and achievements.',
+  icons: {
+    icon: '/assets/kabe_share.png',
+    shortcut: '/assets/kabe_share.png',
+    apple: '/assets/kabe_share.png',
+  },
   robots: {
     index: true,
     follow: true,

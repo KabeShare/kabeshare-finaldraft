@@ -145,7 +145,7 @@ const Navbar = () => {
             href="/all-products"
             className="hover:text-gray-900 transition text-lg font-semibold"
           >
-            ギャラリー
+            全製品
           </Link>
           <Link
             href="/vision"
@@ -210,7 +210,7 @@ const Navbar = () => {
                 </UserButton.MenuItems>
                 <UserButton.MenuItems>
                   <UserButton.Action
-                    label="ギャラリー"
+                    label="全製品"
                     labelIcon={
                       <Image
                         src={assets.gallery}
@@ -278,7 +278,7 @@ const Navbar = () => {
                       onClick={() => router.push('/all-products')}
                       className="hover:text-blue-600"
                     >
-                      ギャラリー
+                      全製品
                     </button>
                     <button
                       onClick={() => router.push('/vision')}
