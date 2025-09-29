@@ -7,7 +7,7 @@ import { ConditionalClerkProvider } from '@/components/ConditionalClerkProvider'
 const outfit = Outfit({ subsets: ['latin'], weight: ['300', '400', '500'] });
 
 export const metadata = {
-  title: 'Kabe Gallery',
+  title: 'Kabe Share',
   description:
     'An innovative e-commerce website with gamification features that boost engagement, customer loyalty, and sales through rewards, challenges, and achievements.',
   robots: {
@@ -28,11 +28,11 @@ export const metadata = {
     canonical: 'https://kabeshare.com/',
   },
   openGraph: {
-    title: 'Kabe Gallery',
+    title: 'Kabe Share',
     description:
       'An innovative e-commerce website with gamification features that boost engagement, customer loyalty, and sales through rewards, challenges, and achievements.',
     url: 'https://kabeshare.com',
-    siteName: 'Kabe Gallery',
+    siteName: 'Kabe Share',
     locale: 'ja_JP',
     type: 'website',
   },

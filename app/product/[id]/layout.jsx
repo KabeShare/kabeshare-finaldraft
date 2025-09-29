@@ -17,10 +17,10 @@ export async function generateMetadata({ params }) {
       const product = data.product;
 
       return {
-        title: `${product.name} - Kabe Gallery`,
+        title: `${product.name} - Kabe Share`,
         description:
           product.description ||
-          `Discover ${product.name} at Kabe Gallery. Premium quality products with fast delivery.`,
+          `Discover ${product.name} at Kabe Share. Premium quality products with fast delivery.`,
         robots: {
           index: true,
           follow: true,
@@ -29,9 +29,9 @@ export async function generateMetadata({ params }) {
           canonical: 'https://kabeshare.com/',
         },
         openGraph: {
-          title: `${product.name} - Kabe Gallery`,
+          title: `${product.name} - Kabe Share`,
           description:
-            product.description || `Discover ${product.name} at Kabe Gallery.`,
+            product.description || `Discover ${product.name} at Kabe Share.`,
           images: product.image ? [product.image[0]] : [],
         },
       };
@@ -42,8 +42,8 @@ export async function generateMetadata({ params }) {
 
   // Fallback metadata
   return {
-    title: 'Product - Kabe Gallery',
-    description: 'Discover amazing products at Kabe Gallery.',
+    title: 'Product - Kabe Share',
+    description: 'Discover amazing products at Kabe Share.',
     robots: {
       index: true,
       follow: true,

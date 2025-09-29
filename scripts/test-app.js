@@ -28,7 +28,7 @@ const req = http.request(options, (res) => {
     // Check for specific error patterns
     if (data.includes('publishableKey passed to Clerk is invalid')) {
       console.log('❌ Clerk error still present in response');
-    } else if (data.includes('Kabe Gallery') || data.includes('人気画像')) {
+    } else if (data.includes('Kabe Share') || data.includes('人気画像')) {
       console.log(
         '✅ Application loaded successfully - Japanese content found'
       );
