@@ -89,15 +89,12 @@ export function ConditionalClerkProvider({ children }) {
     return <>{children}</>;
   }
 
-  try {
-    return (
-      <ClerkProvider localization={customJaLocalization}>
-        {children}
-      </ClerkProvider>
-    );
-  } catch (error) {
-    console.error('ClerkProvider initialization failed:', error);
-    console.warn('Falling back to no authentication mode');
-    return <>{children}</>;
-  }
+  return (
+    <ClerkProvider
+      publishableKey={publishableKey}
+      localization={customJaLocalization}
+    >
+      {children}
+    </ClerkProvider>
+  );
 }

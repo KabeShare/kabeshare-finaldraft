@@ -5,31 +5,7 @@ import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import Image from 'next/image';
 
-// Conditional Clerk imports with fallbacks
-let useClerk, UserButton;
-const isClerkAvailable =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !==
-    'pk_test_ZGV2LWNsZXJrLWZha2Uta2V5LWZvci1kZXZlbG9wbWVudA';
-
-if (isClerkAvailable) {
-  try {
-    const clerkComponents = require('@clerk/nextjs');
-    useClerk = clerkComponents.useClerk;
-    UserButton = clerkComponents.UserButton;
-  } catch (error) {
-    console.warn('Clerk components failed to load:', error);
-    useClerk = () => ({
-      openSignIn: () => console.log('Sign-in not available'),
-    });
-    UserButton = null;
-  }
-} else {
-  useClerk = () => ({
-    openSignIn: () => console.log('Sign-in not available in development mode'),
-  });
-  UserButton = null;
-}
+import { useClerk, UserButton } from '@clerk/nextjs';
 
 // Fallback UserButton component for development
 const FallbackUserButton = ({ onClick, children, ...props }) => (
@@ -44,16 +20,23 @@ const FallbackUserButton = ({ onClick, children, ...props }) => (
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
 
-  // Safe Clerk hook usage with fallback
-  let openSignIn;
+  // Use Clerk hooks directly - they will be available when ClerkProvider is present
+  let clerk, openSignIn;
   try {
-    const clerkHook = useClerk();
+    clerk = useClerk();
     openSignIn =
-      clerkHook?.openSignIn ||
-      (() => console.log('Sign-in not available in development mode'));
+      clerk?.openSignIn ||
+      (() => {
+        console.log('Sign-in not available - please configure Clerk');
+        // Fallback: redirect to sign-in page if available
+        router.push('/sign-in');
+      });
   } catch (error) {
-    console.warn('Clerk hook not available:', error);
-    openSignIn = () => console.log('Sign-in not available in development mode');
+    console.warn('Clerk not available:', error);
+    openSignIn = () => {
+      console.log('Authentication not configured');
+      router.push('/sign-in');
+    };
   }
   const [userPoints, setUserPoints] = useState(0);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
@@ -165,7 +148,7 @@ const Navbar = () => {
 
         <div className="w-[160px] flex justify-end">
           <ul className="hidden md:flex items-center gap-4 ">
-            {user && isClerkAvailable && UserButton ? (
+            {user ? (
               <UserButton>
                 <UserButton.MenuItems>
                   <UserButton.Action
@@ -175,13 +158,6 @@ const Navbar = () => {
                   />
                 </UserButton.MenuItems>
               </UserButton>
-            ) : user ? (
-              <div className="flex items-center gap-2">
-                <FallbackUserButton
-                  onClick={() => router.push('/user-point')}
-                />
-                <span className="text-sm">ポイント: {userPoints}</span>
-              </div>
             ) : (
               <button
                 onClick={openSignIn}
@@ -199,7 +175,7 @@ const Navbar = () => {
             メニュー
           </div>
           <div className="flex items-center gap-3">
-            {user && isClerkAvailable && UserButton ? (
+            {user ? (
               <UserButton>
                 <UserButton.MenuItems>
                   <UserButton.Action
@@ -302,7 +278,7 @@ const Navbar = () => {
         </div>
       </nav>
       {showInfoPopup && (
-        <div className="fixed left-1/2 top-[4rem] -translate-x-1/2 bg-white px-7 py-5 rounded-xl shadow-lg z-[100] min-w-[340px] max-w-sm border border-amber-300 flex items-center justify-center relative">
+        <div className="fixed left-1/2 top-[4rem] -translate-x-1/2 bg-white px-7 py-5 rounded-xl shadow-lg z-[100] min-w-[340px] max-w-sm border border-amber-300 flex items-center justify-center">
           <p className="text-base text-gray-800 text-center font-medium leading-relaxed pr-10">
             ユーザー名には英数字と{' '}
             <span className="font-bold text-amber-700">_</span>

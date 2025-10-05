@@ -1,9 +1,18 @@
-// middleware.ts - Development-friendly version
-import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-// Simple middleware that allows all access in development
-export default function middleware(request) {
-  // Skip middleware entirely in development or when Clerk is not properly configured
+// Define public routes that don't require authentication
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/vision',
+  '/all-products',
+  '/product/(.*)',
+  '/api/product/(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  // Check if we have valid Clerk configuration
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const hasValidClerkKey =
     publishableKey &&
@@ -12,15 +21,23 @@ export default function middleware(request) {
     (publishableKey.startsWith('pk_test_') ||
       publishableKey.startsWith('pk_live_'));
 
-  if (!hasValidClerkKey || process.env.NODE_ENV === 'development') {
+  // If no valid Clerk key, allow all access (development mode)
+  if (!hasValidClerkKey) {
     console.log('🔓 Middleware: Allowing all access (development mode)');
-    return NextResponse.next();
+    return;
   }
 
-  // In production with valid keys, you can add authentication logic here
-  // For now, allow all access
-  return NextResponse.next();
-}
+  // If route is public, allow access
+  if (isPublicRoute(req)) {
+    return;
+  }
+
+  // For protected routes, require authentication
+  const { userId } = await auth();
+  if (!userId) {
+    return Response.redirect(new URL('/sign-in', req.url));
+  }
+});
 
 export const config = {
   matcher: [
