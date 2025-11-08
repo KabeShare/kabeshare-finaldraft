@@ -11,35 +11,29 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/sitemap',
   '/sitemap.xml',
+  '/robots.txt',
+]);
+
+// Define protected routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/cart(.*)',
+  '/my-orders(.*)',
+  '/order-placed(.*)',
+  '/add-address(.*)',
+  '/user-point(.*)',
+  '/seller(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Check if we have valid Clerk configuration
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasValidClerkKey =
-    publishableKey &&
-    publishableKey !==
-      'pk_test_ZGV2LWNsZXJrLWZha2Uta2V5LWZvci1kZXZlbG9wbWVudA' &&
-    (publishableKey.startsWith('pk_test_') ||
-      publishableKey.startsWith('pk_live_'));
-
-  // If no valid Clerk key, allow all access (development mode)
-  if (!hasValidClerkKey) {
-    console.log('🔓 Middleware: Allowing all access (development mode)');
-    return;
+  // Protect specific routes only - require authentication
+  if (isProtectedRoute(req)) {
+    const authObj = await auth();
+    if (!authObj.userId) {
+      const { NextResponse } = await import('next/server');
+      return NextResponse.redirect(new URL('/sign-in', req.url));
+    }
   }
-
-  // If route is public, allow access
-  if (isPublicRoute(req)) {
-    return;
-  }
-
-  // For protected routes, require authentication
-  const { userId } = await auth();
-  if (!userId) {
-    const { NextResponse } = await import('next/server');
-    return NextResponse.redirect(new URL('/sign-in', req.url));
-  }
+  // All other routes (including public routes) are accessible without authentication
 });
 
 export const config = {
