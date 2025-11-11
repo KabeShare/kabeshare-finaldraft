@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-// Define public routes that don't require authentication
+// Define ALL public routes - these will be completely open to crawlers
 const isPublicRoute = createRouteMatcher([
   '/',
   '/vision',
@@ -9,8 +10,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/product/(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/sitemap',
-  '/sitemap.xml',
+  '/sitemap(.*)',
   '/robots.txt',
 ]);
 
@@ -25,15 +25,30 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Protect specific routes only - require authentication
-  if (isProtectedRoute(req)) {
-    const authObj = await auth();
-    if (!authObj.userId) {
-      const { NextResponse } = await import('next/server');
-      return NextResponse.redirect(new URL('/sign-in', req.url));
-    }
+  const { pathname } = req.nextUrl;
+
+  // Explicitly allow public routes - bypass all Clerk checks
+  if (isPublicRoute(req)) {
+    console.log(`✅ Public route allowed: ${pathname}`);
+    return NextResponse.next();
   }
-  // All other routes (including public routes) are accessible without authentication
+
+  // For protected routes, check authentication
+  if (isProtectedRoute(req)) {
+    console.log(`🔒 Protected route - checking auth: ${pathname}`);
+    const { userId } = await auth();
+    if (!userId) {
+      console.log(`❌ No auth - redirecting to sign-in`);
+      const signInUrl = new URL('/sign-in', req.url);
+      signInUrl.searchParams.set('redirect_url', pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+    console.log(`✅ Authenticated - allowing access`);
+  }
+
+  // Default: allow access
+  console.log(`✅ Default - allowing access: ${pathname}`);
+  return NextResponse.next();
 });
 
 export const config = {
