@@ -11,7 +11,9 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/sitemap(.*)',
+  '/sitemap.xml',
   '/robots.txt',
+  '/favicon.ico',
 ]);
 
 // Define protected routes that require authentication
@@ -27,28 +29,44 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
+  // Detect common crawlers/bots to ensure they can reach public pages
+  const ua = req.headers.get('user-agent') || '';
+  const isBot =
+    /bot|crawler|spider|crawling|google|bing|baidu|yandex|duckduck|yahoo|sogou|exabot|facebookexternalhit|facebot|slurp/i.test(
+      ua
+    );
+
+  // Helper to create a pass-through response with proper robots headers
+  const allow = (indexFollow = 'index, follow') => {
+    const res = NextResponse.next();
+    res.headers.set('X-Robots-Tag', indexFollow);
+    return res;
+  };
+
   // Explicitly allow public routes - bypass all Clerk checks
   if (isPublicRoute(req)) {
     console.log(`✅ Public route allowed: ${pathname}`);
-    return NextResponse.next();
+    return allow('index, follow');
   }
 
   // For protected routes, check authentication
   if (isProtectedRoute(req)) {
     console.log(`🔒 Protected route - checking auth: ${pathname}`);
     const { userId } = await auth();
-    if (!userId) {
+    if (!userId && !isBot) {
       console.log(`❌ No auth - redirecting to sign-in`);
       const signInUrl = new URL('/sign-in', req.url);
       signInUrl.searchParams.set('redirect_url', pathname);
       return NextResponse.redirect(signInUrl);
     }
-    console.log(`✅ Authenticated - allowing access`);
+    // Authenticated users (or bots on protected pages) should not be indexed
+    console.log(`✅ Authenticated or bot on protected - allow but noindex`);
+    return allow('noindex, nofollow');
   }
 
-  // Default: allow access
+  // Default: allow access and allow indexing
   console.log(`✅ Default - allowing access: ${pathname}`);
-  return NextResponse.next();
+  return allow('index, follow');
 });
 
 export const config = {

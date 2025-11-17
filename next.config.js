@@ -1,20 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Keep config in sync with next.config.mjs
     domains: ['img.clerk.com', 'res.cloudinary.com'],
-  },
-  async headers() {
-    return [
+    remotePatterns: [
       {
-        source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
-        headers: [
-          {
-            key: 'X-Robots-Tag',
-            value: 'index, follow',
-          },
-        ],
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '**',
       },
-    ];
+    ],
   },
 };
 
