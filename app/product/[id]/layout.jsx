@@ -1,5 +1,7 @@
 export async function generateMetadata({ params }) {
-  const { id } = params;
+  // Next 15 makes params a Promise; reading it synchronously logs an error
+  // today and becomes a hard failure in Next 16.
+  const { id } = await params;
 
   try {
     // Fetch product data for dynamic metadata
