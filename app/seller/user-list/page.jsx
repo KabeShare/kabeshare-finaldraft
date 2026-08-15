@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
 import Footer from "@/components/seller/Footer";
-// import { clerkClient } from '@clerk/nextjs';
 
 const UserListPage = () => {
   const [users, setUsers] = useState([]);
@@ -33,8 +32,8 @@ const UserListPage = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      const userToDelete = users.find((user) => user._id === userId);
-      // Delete from MongoDB
+      // One request removes the Clerk account and the database record together,
+      // so the two can no longer drift apart when the Clerk side fails.
       const response = await fetch("/api/user/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -44,25 +43,8 @@ const UserListPage = () => {
       const data = await response.json();
       if (data.success) {
         setUsers(users.filter((user) => user._id !== userId));
-        alert("User deleted successfully");
-        // Delete from Clerk using API route
-        if (userToDelete) {
-          const clerkRes = await fetch("/api/clerk", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ clerkId: userToDelete._id }),
-          });
-          const clerkData = await clerkRes.json();
-          if (!clerkRes.ok || clerkData.error) {
-            console.error("Clerk delete error:", clerkData);
-            alert(
-              "Warning: User deleted from database but could not be deleted from Clerk (authentication system)."
-            );
-          }
-        }
-      } else {
-        alert(data.message);
       }
+      alert(data.message);
     } catch (err) {
       console.error("Error deleting user:", err);
       alert("Failed to delete user");
