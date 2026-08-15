@@ -41,9 +41,35 @@ export async function GET(request) {
           { upsert: true, new: true, setDefaultsOnInsert: true }
         );
       } catch (error) {
-        // The webhook may have inserted the same user in the gap above.
         if (error?.code !== 11000) throw error;
+
+        // The webhook may have inserted this user in the gap above.
         user = await User.findById(userId);
+
+        // Otherwise the email already belongs to an earlier record for the same
+        // person — a re-registration mints a new Clerk id while the old document
+        // keeps the email, and the unique index rejects the insert on every
+        // request from then on. Carry the record over instead of leaving them
+        // permanently unable to load their account.
+        if (!user) {
+          const email = clerkUser.emailAddresses[0]?.emailAddress;
+          const previous = email ? await User.findOne({ email }) : null;
+
+          if (previous) {
+            // _id is immutable, so the record has to be re-created under the new
+            // Clerk id. Points, cart, and awarded products come along.
+            const carried = previous.toObject();
+            delete carried._id;
+
+            await User.deleteOne({ _id: previous._id });
+            user = await User.create({
+              ...carried,
+              _id: userId,
+              name,
+              imageUrl: clerkUser.imageUrl,
+            });
+          }
+        }
       }
     }
 
