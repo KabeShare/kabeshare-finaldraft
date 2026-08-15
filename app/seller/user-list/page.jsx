@@ -41,14 +41,6 @@ const UserListPage = () => {
         body: JSON.stringify({ userId }),
       });
 
-      try {
-        await clerkClient.users.deleteUser(userId);
-        return Response.json({ message: "User deleted" });
-      } catch (error) {
-        console.log(error);
-        return Response.json({ error: "Error deleting user" });
-      }
-
       const data = await response.json();
       if (data.success) {
         setUsers(users.filter((user) => user._id !== userId));

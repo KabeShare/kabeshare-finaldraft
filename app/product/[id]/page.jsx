@@ -286,8 +286,13 @@ const CommentSection = React.memo(
                       {comment.userName}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      {new Date(comment.date).toLocaleTimeString()} |{' '}
-                      {new Date(comment.date).toLocaleDateString()}
+                      <span>
+                        {new Date(comment.date).toLocaleTimeString()}
+                      </span>
+                      <span> | </span>
+                      <span>
+                        {new Date(comment.date).toLocaleDateString()}
+                      </span>
                     </p>
                   </div>
                 </div>

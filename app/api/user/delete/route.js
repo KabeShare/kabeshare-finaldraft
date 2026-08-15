@@ -1,9 +1,18 @@
 import connectDB from '@/config/db';
+import authSeller from '@/lib/authSeller';
 import User from '@/models/User';
+import { getAuth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function DELETE(request) {
   try {
+    const { userId: requesterId } = getAuth(request);
+
+    const isSeller = await authSeller(requesterId);
+    if (!isSeller) {
+      return NextResponse.json({ success: false, message: 'not authorized' });
+    }
+
     const { userId } = await request.json();
 
     if (!userId) {

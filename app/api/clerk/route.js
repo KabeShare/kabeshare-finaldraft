@@ -1,7 +1,18 @@
-import { clerkClient } from '@clerk/nextjs/server';
+import authSeller from '@/lib/authSeller';
+import { clerkClient, getAuth } from '@clerk/nextjs/server';
 
 export async function POST(req) {
   try {
+    const { userId: requesterId } = getAuth(req);
+
+    const isSeller = await authSeller(requesterId);
+    if (!isSeller) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Not authorized' }),
+        { status: 403 }
+      );
+    }
+
     const { clerkId } = await req.json();
     if (!clerkId) {
       return new Response(
@@ -9,7 +20,12 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    await clerkClient.users.deleteUser(clerkId);
+
+    // clerkClient is an async factory in @clerk/nextjs v6; the v5 object form
+    // (clerkClient.users) is undefined and threw on every call.
+    const client = await clerkClient();
+    await client.users.deleteUser(clerkId);
+
     return new Response(
       JSON.stringify({ success: true, message: 'User deleted' }),
       { status: 200 }

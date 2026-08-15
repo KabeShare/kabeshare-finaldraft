@@ -29,6 +29,14 @@ export const metadata = {
   verification: {
     google: process.env.GOOGLE_VERIFICATION,
   },
+  // Chrome's page translation rewrites text nodes into <font> wrappers, which
+  // React then fails to unmount on route changes ("removeChild ... not a child
+  // of this node"). The site is authored in Japanese for Japanese readers, so
+  // opting out of translation costs little and keeps navigation from crashing.
+  // See https://github.com/facebook/react/issues/11538
+  other: {
+    google: 'notranslate',
+  },
   alternates: {
     canonical: 'https://kabeshare.com/',
   },
@@ -46,7 +54,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ConditionalClerkProvider>
-      <html lang="en">
+      <html lang="ja">
         <body className={`${outfit.className} antialiased text-gray-700`}>
           <Toaster />
           <AppContextProvider>{children}</AppContextProvider>
